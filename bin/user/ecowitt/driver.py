@@ -282,7 +282,7 @@ class EcowittConfEditor(weewx.drivers.AbstractConfEditor):
     def default_stanza(self):
         return """
 [Ecowitt]
-    # This section is for Ecowitt hardware that uploads to a custom server.
+    # Ecowitt HTTP Push receiver for custom-server uploads.
 
     # The port to listen on. Ports below 1024 need root.
     port = 8000

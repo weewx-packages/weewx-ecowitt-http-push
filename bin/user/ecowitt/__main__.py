@@ -52,7 +52,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.WARNING, format='%(message)s')
-    print("weewx-ecowitt %s. Listening on %s:%s. Point the console here."
+    print("Ecowitt HTTP Push %s. Listening on %s:%s. Point the console here."
           % (VERSION, args.address or '*', args.port))
 
     mapper = Mapper(infer_unknown=args.infer_unknown)

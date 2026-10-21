@@ -1,89 +1,59 @@
-# Installation
+# Installation and updates
 
-## Requirements
-
-- WeeWX 5.0 or later
-- Python 3.7 or later
-- Ecowitt hardware that offers **Customized** upload: GW1000, GW1100, GW1200,
-  GW2000, GW3000, HP2551, HP2561, WS3800, WS3900, WS3910, WN1980 and their relatives
-
-Nothing else. No pip packages, no compiler.
+Requires WeeWX 5.0+, Python 3.7+ and a gateway or console with **Customized**
+server upload. No additional Python packages are required. See [Hardware](Hardware.md).
 
 ## Install
 
-```
-weectl extension install https://github.com/hilman2/weewx-ecowitt/releases/latest/download/weewx-ecowitt.zip
+```sh
+weectl extension install https://github.com/weewx-packages/weewx-ecowitt-http-push/releases/download/v0.3.2/weewx-ecowitt-http-push-0.3.2.zip
 weectl station reconfigure
 ```
 
-`reconfigure` offers `Ecowitt` in the list of station types. Picking it writes an
-`[Ecowitt]` section with starting values.
+Select **Ecowitt**. The installer configures `[Ecowitt]`,
+`driver = user.ecowitt.driver` and rain calculation. These technical names remain
+compatible with earlier versions. To install a checkout, pass its directory to
+`weectl extension install` instead.
 
-To install from a clone instead:
+With a repository-enabled WeeWX build, register the shared catalog once:
 
+```sh
+weectl extension repo add packages https://raw.githubusercontent.com/weewx-packages/catalog/main/repository.json
+weectl extension install ecowitt-http-push
+weectl station reconfigure
 ```
-git clone https://github.com/hilman2/weewx-ecowitt.git
-weectl extension install weewx-ecowitt
-```
 
-## Point the hardware at it
+## Configure the hardware
 
-In **WS View Plus**: *Weather Services*, page through to *Customized*.
+In **WS View Plus → Weather Services → Customized**:
 
 | Field | Value |
 |---|---|
-| Protocol Type | Ecowitt |
-| Server IP / Hostname | the machine running WeeWX |
-| Path | `/` unless you set `path` |
-| Port | 8000 unless you changed it |
-| Upload Interval | 60 |
+| Protocol Type | **Ecowitt**; Wunderground also works but carries fewer fields |
+| Server IP / Hostname | WeeWX machine's reachable address |
+| Path | `/`, or the configured `path` |
+| Port | **8000**, or the configured `port` |
+| Upload Interval | **60 seconds**; supported intervals depend on the hardware |
 
-Save. The console uploads on its own schedule from then on.
+Save and reopen the page to verify the settings. Before starting WeeWX, you can
+[inspect one upload](Diagnostics.md) on port 8001, then restore port 8000.
 
-## Check before starting WeeWX
-
-```
-python -m user.ecowitt --port 8001
-```
-
-Point the console at port 8001 for one upload, then change it back. The command
-prints what arrived, what it could not place, which database columns are missing, and
-which of those already hold readings. Running it changes nothing.
-
-## Start
-
-```
+```sh
 sudo systemctl restart weewx
 sudo journalctl -u weewx -f
 ```
 
-Within one upload interval the log shows:
+Within one upload interval, look for `Listening for HTTP requests` and incoming
+readings. Resolve fields waiting for a [mapping](Field-map.md), then add any
+needed [archive columns](Database-columns.md).
 
-```
-INFO user.ecowitt.driver: Driver version is 0.1.0, listening with user.listener, the bundled copy
-INFO weewx.listener: Listening for HTTP requests on *:8000
-INFO weewx.engine: Starting main packet loop.
-```
+## Update or remove
 
-Followed, on the first upload, by any fields waiting for a decision. See
-[Field map](Field-map).
+Read the [changelog](https://github.com/weewx-packages/weewx-ecowitt-http-push/blob/main/CHANGELOG.md)
+for changed field placements. Install the new release over the existing one, or
+run `weectl extension update ecowitt` when using the catalog. The installed
+extension is named `ecowitt`. Existing
+`[Ecowitt]` settings are retained. Restart WeeWX afterwards.
 
-## Upgrade
-
-```
-weectl extension install https://github.com/hilman2/weewx-ecowitt/releases/latest/download/weewx-ecowitt.zip
-sudo systemctl restart weewx
-```
-
-Your `[Ecowitt]` section is left alone. Read the
-[changelog](https://github.com/hilman2/weewx-ecowitt/blob/main/CHANGELOG.md) first if
-you skipped versions: a field that moves is listed there.
-
-## Uninstall
-
-```
-weectl extension uninstall ecowitt
-weectl station reconfigure
-```
-
-Pick another station type when asked. The database keeps everything it collected.
+To remove the driver, run `weectl extension uninstall ecowitt`, select another
+driver with `weectl station reconfigure`, then restart WeeWX. Archive data remains.

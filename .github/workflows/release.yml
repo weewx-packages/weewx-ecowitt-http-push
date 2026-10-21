@@ -23,9 +23,9 @@ jobs:
 
       - name: Build the extension package
         run: |
-          name="weewx-ecowitt-${GITHUB_REF_NAME#v}"
+          name="weewx-ecowitt-http-push-${GITHUB_REF_NAME#v}"
           mkdir -p "build/${name}"
-          cp -r install.py bin LICENSE README.md CHANGELOG.md "build/${name}/"
+          cp -r install.py bin docs LICENSE README.md CHANGELOG.md "build/${name}/"
           find "build/${name}" -name '__pycache__' -type d -prune -exec rm -rf {} +
           (cd build && zip -qr "../${name}.zip" "${name}")
           echo "ASSET=${name}.zip" >> "$GITHUB_ENV"

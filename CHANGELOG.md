@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.2 (2026-10-21)
+
+* Publish as Ecowitt HTTP Push under `weewx-packages`, with package ID
+  `ecowitt-http-push` in the shared catalog. Existing `[Ecowitt]` configuration,
+  installer name `ecowitt` and module paths remain compatible.
+* Condense the documentation and include it in release archives. Correct the
+  console-storage, diagnostic-schema and HTTP/TLS instructions to match the code.
+
 ## 0.3.1 (2026-08-25)
 
 Fix: no rain was recorded at all. Ecowitt hardware sends rain as running counters,

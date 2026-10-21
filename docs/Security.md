@@ -1,92 +1,60 @@
-# Keeping strangers out
+# Network access
 
-The driver opens a port that accepts weather readings. Anyone who can reach it can
-post readings, and the console has no way to prove it is the console. Ecowitt
-hardware sends a `PASSKEY`, but that is a fixed value visible in every upload, so it
-is an identifier rather than a secret.
+The listener accepts HTTP weather uploads. A console's `PASSKEY` identifies it
+and prevents accidental mixing, but does not prove who sent a request. See
+[console identities](Several-consoles.md).
 
-Four settings narrow the exposure. Use as many as fit.
+Restrict access to the station's network and use the controls that your hardware
+can send:
 
-## Bind to one address
+| Control | Example | Effect |
+|---|---|---|
+| `address` | `192.168.1.10` | Listen on that interface only |
+| `path` | `/a8f3c1e0-4b2d/report` | Other paths receive HTTP 404 |
+| `allowed_hosts` | `192.168.1.42, 192.168.1.43` | Other addresses receive HTTP 403; keep DHCP assignments stable |
+| `token` | A private random value | Require query parameter `token`, `X-Auth-Token`, or `Authorization: Bearer`; mismatch receives HTTP 403 |
 
-```ini
-[Ecowitt]
-    address = 192.168.1.10
-```
+Most consoles can configure a path but not custom headers. Generate a private path:
 
-Only that interface accepts anything. Behind a reverse proxy, `localhost` means the
-port cannot be reached from the network at all:
-
-```ini
-    address = localhost
-    trust_proxy = true
-```
-
-`trust_proxy` makes the driver take the client address from `X-Forwarded-For`, which
-is right only when a proxy you control sets that header. Without a proxy, leave it
-off: anyone can send that header themselves.
-
-## A path nobody can guess
-
-```ini
-    path = /a8f3c1e0-4b2d/report
-```
-
-Anything else gets a 404. Most consoles can be given a path but not a header or a
-query parameter, which makes this the practical secret for hardware.
-
-Generate one:
-
-```
+```sh
 python -c "import secrets; print('/%s/report' % secrets.token_hex(8))"
 ```
 
-## A token
+These settings do not encrypt the connection or prevent forged readings from
+someone who knows the credentials. For uploads across untrusted networks, use a
+VPN or an HTTPS-capable relay. A TLS reverse proxy cannot encrypt the connection
+from a console that sends plain HTTP.
 
-For anything that can send a header or a query parameter:
-
-```ini
-    token = 4f8a2c1e9b7d3a5f
-```
-
-Accepted as query parameter `token`, header `X-Auth-Token`, or a bearer token in
-`Authorization`. Compared in constant time. Anything else gets a 403.
-
-## Only from known addresses
+## Behind a trusted local proxy
 
 ```ini
-    allowed_hosts = 192.168.1.42, 192.168.1.43
+[Ecowitt]
+    address = localhost
+    port = 8000
+    path = /a8f3c1e0-4b2d/report
+    trust_proxy = true
 ```
 
-Anything else gets a 403. Behind a proxy this sees the proxy unless `trust_proxy` is
-set, so set both together or neither.
+For nginx:
 
-## What none of this does
-
-**Encryption.** The Ecowitt protocol is plain HTTP, and consoles do not offer TLS. On
-a local network that is usually acceptable. Across the internet, put a reverse proxy
-with a certificate in front and let it terminate TLS. The path and the readings are
-then encrypted between the console and the proxy, and the proxy talks to the driver
-on localhost.
-
-**Authentication of the sensor.** Nothing stops somebody who knows your path from
-posting a plausible temperature. The defence is that they have to know it.
-
-## A limit worth keeping
-
-```ini
-    max_body = 65536
+```nginx
+location /a8f3c1e0-4b2d/report {
+    proxy_pass http://127.0.0.1:8000;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+}
 ```
 
-The default. An upload is a few hundred bytes, so anything near this is not a weather
-station. Requests above it get a 413 without being read into memory.
+For Caddy, inside the site's configuration:
 
-## After changing any of it
-
-Restart WeeWX and change the console to match. A console pointed at the old path will
-be answered with a 404 and its readings dropped, silently as far as it is concerned.
-The log says so:
-
+```caddy
+handle /a8f3c1e0-4b2d/report {
+    reverse_proxy 127.0.0.1:8000
+}
 ```
-WARNING weewx.listener: Rejected a request from 192.168.1.42: bad or missing token
-```
+
+Enable `trust_proxy` only when the listener is reachable solely through a proxy
+you control. It makes `allowed_hosts` check the forwarded client address;
+otherwise it would see the proxy's address.
+
+The default body limit is 65536 bytes; larger uploads receive HTTP 413. Restart
+WeeWX after changes and update the console to match, or uploads will be rejected.

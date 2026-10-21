@@ -3,11 +3,11 @@
 #
 #    See the file LICENSE for your full rights.
 #
-"""Installer for the Ecowitt driver."""
+"""Installer for the Ecowitt HTTP Push driver."""
 
 from weecfg.extension import ExtensionInstaller
 
-VERSION = '0.3.1'
+VERSION = '0.3.2'
 
 
 def loader():
@@ -19,8 +19,7 @@ class EcowittInstaller(ExtensionInstaller):
         super(EcowittInstaller, self).__init__(
             version=VERSION,
             name='ecowitt',
-            description='Collect data from Ecowitt hardware that uploads to a '
-                        'custom server.',
+            description='Ecowitt HTTP Push driver for custom-server uploads.',
             author="Manuel Hilgert",
             author_email="hilman2@gmail.com",
             config={

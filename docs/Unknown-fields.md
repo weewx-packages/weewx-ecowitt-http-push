@@ -1,91 +1,40 @@
 # Unknown fields
 
-A field the catalog does not cover is examined rather than dropped. Two things can be
-said about one without guessing, and they are kept apart.
+The driver examines unknown names once per run. Restart it to repeat the messages.
 
-## Derived
-
-The field continues a series the catalog describes. If `zz_ch1` and `zz_ch2` are
-known, `zz_ch3` follows from them: the hardware numbers its own channels, and the
-catalog supplies both ends of the series.
-
-```
-INFO user.ecowitt.mapping: New field 'leafwetness_ch5' -> 'leafWet5' (group_percent),
-continues leafwetness_ch, e.g. leafWet1
-```
-
-Taken automatically, unless the family's placement is a convention rather than a
-reading. Those wait for you. See [Field map](Field-map).
-
-## Guessed
-
-The name says what the reading is. Ecowitt is consistent about this:
-
-| Pattern | Reading |
+| `infer_unknown` | Behaviour |
 |---|---|
-| `rssi` | signal strength, dB |
-| `_sig` | signal quality, a count |
-| `batt` | battery |
-| `_time` | a timestamp |
-| `barom...in` | pressure, inHg |
-| `rain...in`, `rain...piezo` | rain, inches |
-| `mph` | speed, mph |
-| `winddir...` | direction, degrees |
-| `temp...`, `tf_...`, `soiltemp`, `thermo` | temperature, °F |
-| `humidity`, `moisture`, `_hum` | percent |
-| `pm1`, `pm4`, `pm10`, `pm25` | concentration, µg/m³ |
-| `co2`, `co` | ppm |
-| `solarradiation`, `radiation` | W/m² |
-| `uv` | UV index |
-| `vpd` | pressure, kPa |
-| `depth_ch`, `air_ch`, `thi_ch` | distance, mm |
+| `off` | Log and drop all unknown fields |
+| `series` | Accept fields derived from known channel patterns when placement is unambiguous; log other proposals. Default. |
+| `all` | Also accept naming-based guesses; units may be wrong. Used by the diagnostic command. |
 
-Reported, not taken:
+Explicit [mappings](Field-map.md) override these modes. Catalog fields requiring a
+placement decision remain withheld until mapped.
 
-```
-INFO user.ecowitt.mapping: New field 'yearlyrainin' looks like group_rain
-(name matches rain.*in$|rain.*piezo$), but it was only guessed. Left out.
-Add it to field_map_extensions to keep it.
-```
+## Derived channels and guesses
 
-A guessed field would go to `ecowitt_` plus its raw name, which collides with nothing.
+A derived channel extends a known series, such as `zz_ch3` when `zz_ch1` and
+`zz_ch2` are mapped. Channels beyond the hardware's published limit are reported
+as guesses. Families with ambiguous placement wait for a mapping in `series` mode.
 
-## Past the published channel count
+Other names suggest a quantity and unit. Guesses use `ecowitt_` plus the raw name
+as their field name unless a known series supplies a destination.
 
-Ecowitt publishes how many channels each sensor supports. A channel beyond that is
-real but not routine, so it is reported rather than derived:
-
-```
-soilmoisture17   soilMoist17   channel 17, past the 16 a WH51 is said to support
-```
-
-Either the published figures have moved on, or something else is going on. Both are
-worth a look before the reading lands in a column.
-
-## Nothing can be said
-
-```
-INFO user.ecowitt.mapping: No idea what 'wizzlefrob' is. Left out.
-```
-
-Please report it. See [Reporting a new sensor](New-sensors).
-
-## The setting
-
-```ini
-[Ecowitt]
-    infer_unknown = series
-```
-
-| Value | Effect |
+| Name pattern | Inferred quantity / unit |
 |---|---|
-| `off` | Nothing is taken. Everything unknown is logged and dropped. |
-| `series` | Derived fields are taken, unless their placement is a convention. Guesses are logged. **Default.** |
-| `all` | Guesses are taken too, under `ecowitt_` plus the raw name. |
+| `rssi`, `_sig` | Signal strength / dB; signal quality / count |
+| `batt`, `_time` | Battery; timestamp |
+| `barom...in` | Pressure / inHg |
+| `rain...in`, `rain...piezo` | Rain / inches |
+| `mph`, `winddir...` | Speed / mph; direction / degrees |
+| `temp...`, `tf_...`, `soiltemp`, `thermo` | Temperature / °F |
+| `humidity`, `moisture`, `_hum` | Percent |
+| `pm1`, `pm4`, `pm10`, `pm25` | Concentration / µg/m³ |
+| `co2`, `co` | Concentration / ppm |
+| `solarradiation`, `radiation` | Radiation / W/m² |
+| `uv`, `vpd` | UV index; pressure / kPa |
+| `depth_ch`, `air_ch`, `thi_ch` | Distance / mm |
 
-`all` gets you the reading sooner, at the risk of a unit nobody checked. It is the
-right setting while working out what a station sends, which is why
-`python -m user.ecowitt` uses it.
-
-Whatever the setting, a field is reported once per run. Restart the driver to see the
-messages again.
+Names with no recognised pattern are logged and dropped even in `all` mode.
+[Report new sensors](New-sensors.md) so quantities and units can be verified and
+added to the catalog. Accepted fields also need [archive columns](Database-columns.md).

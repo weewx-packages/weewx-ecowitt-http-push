@@ -24,11 +24,11 @@ log = logging.getLogger(__name__)
 
 DEFAULT_PATH = '/var/tmp/weewx-ecowitt-report.txt'
 
-TEMPLATE = """weewx-ecowitt %(version)s, %(when)s
+TEMPLATE = """weewx-ecowitt-http-push %(version)s, %(when)s
 
 This station sent %(count)d field(s) the driver could not place on its own. Paste
 this whole file into an issue at
-https://github.com/hilman2/weewx-ecowitt/issues/new
+https://github.com/weewx-packages/weewx-ecowitt-http-push/issues/new
 
 The PASSKEY has been replaced already. Everything else is weather data.
 

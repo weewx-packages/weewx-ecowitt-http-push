@@ -1,121 +1,57 @@
 # Development
 
-## Layout
-
-```
-bin/user/ecowitt/
-    protocol.py    text in, named readings out. No sockets, no clock, no WeeWX.
-    catalog.py     generated. Raw field to WeeWX field, unit groups, channel counts.
-    infer.py       what to do with a field the catalog does not cover.
-    mapping.py     the three above, combined into a packet. Still no WeeWX.
-    columns.py     which database columns a packet needs.
-    driver.py      the WeeWX end: loop packets, unit groups, shutdown.
-    __main__.py    the diagnostic command.
-bin/user/listener.py   WeeWX's own listener, bundled for WeeWX older than 5.6.
-tools/                 catalog and reference generators.
-tests/                 pytest, with captured payloads in tests/fixtures.
-```
-
-Everything below `driver.py` runs without WeeWX installed. That is what lets the
-tests work from a captured payload rather than from mocks.
+| Path | Purpose |
+|---|---|
+| `bin/user/ecowitt/protocol.py` | Parse uploads and console timestamps |
+| `catalog.py`, `infer.py`, `mapping.py` | Generated fields, inference and packet mapping |
+| `columns.py`, `consoles.py`, `report.py` | Archive checks, console identities and sensor reports |
+| `driver.py`, `__main__.py` | WeeWX driver and diagnostic command |
+| `bin/user/listener.py` | Bundled listener for WeeWX versions without `weewx.listener` |
+| `tools/`, `tests/fixtures/` | Generators and redacted captured uploads |
 
 ## Tests
 
-```
+```sh
 pip install pytest
 python -m pytest tests -q
 ```
 
-Without WeeWX, the tests that need it are skipped. With it, everything runs:
+Tests needing WeeWX are skipped when it is absent. Install `weewx` to include
+them. CI covers Python 3.8–3.13, WeeWX integration and syntax compatibility with
+Python 3.7. The bundled listener must remain identical to the core version it
+copies; update it from upstream rather than modifying it separately.
 
-```
-pip install weewx
-python -m pytest tests -q
-```
+## Catalog and references
 
-CI runs both, across Python 3.8 to 3.13, plus a vermin check against 3.7.
-
-## The catalog
-
-`bin/user/ecowitt/catalog.py` is generated, not written:
-
-```
+```sh
 python tools/import_catalog.py path/to/ecowittcustom.py \
     --schema path/to/weewx/schemas/wview_extended.py
-```
-
-Three lists in `tools/import_catalog.py` decide where a reading goes:
-
-- `CHANNELS` — how far each sensor family reaches
-- `REMAP` — families placed differently from the source, with the reason
-- `OVERRIDES` — single fields, likewise
-
-The tool reports what it could not settle: fields written by more than one reading,
-readings with more than one candidate field, raw names with no target. None of it
-passes quietly.
-
-`CONTESTED` in the generated catalog comes from `REMAP` and `OVERRIDES`, so the list
-of fields that wait for the user cannot drift from the decisions that made them wait.
-
-## The generated pages
-
-`docs/Sensors.md` and `docs/Hardware.md` are generated:
-
-```
 python tools/build_reference.py
 python tools/build_hardware.py
 ```
 
-The hardware page keeps the descriptions in the tool and takes the field lists from
-the catalog, so the two cannot drift apart. It also prints how many catalog fields
-belong to no device, which is how gaps in the list get found. Eight are unidentified
-at the moment.
+Edit the generator's `CHANNELS`, `REMAP` and `OVERRIDES`, then regenerate.
+`CONTESTED` derives from those placement decisions. Review reported collisions,
+alternative destinations and raw names without targets. Give new observations a
+unit group, add a channel family and count where needed, and capture a redacted
+payload with an expected-output test.
 
-## Checking against Ecowitt
+`Sensors.md` and `Hardware.md` are generated. Change their generators, not the
+output. Hardware descriptions live in `tools/build_hardware.py`; its field lists
+come from the catalog and its final section lists unidentified fields.
 
-Ecowitt publishes its cloud API, and the pages behind the site come from a plain
-endpoint. The channel counts can be verified rather than trusted:
+`python tools/check_against_ecowitt.py` compares channel counts with Ecowitt's
+published API. It cannot verify custom-upload names, which differ from cloud API
+names. See [New sensors](New-sensors.md) for payload evidence.
 
-```
-python tools/check_against_ecowitt.py
-```
+## Releases and wiki
 
-```
-Ecowitt family           model    documented ours
-leaf_ch                  WN35     8          8
-soil_ch                  WH51     16         16
-temp_ch                  WN34     8          8
-```
+Update `VERSION` in `install.py` and `bin/user/ecowitt/__init__.py`, add a
+changelog entry, run tests, then push a matching `vX.Y.Z` tag. The release workflow
+checks both versions and publishes the ZIP. Register its URL and SHA-256 in the
+[shared catalog](https://github.com/weewx-packages/catalog), following that
+project's contribution guide. Keep the existing installer name `ecowitt` and
+module path `user.ecowitt.driver` stable.
 
-What this cannot check is the raw field names. The cloud API says
-`soil_ch1.soilmoisture` where a console posts `soilmoisture1`, and nothing published
-connects the two.
-
-## The bundled listener
-
-`bin/user/listener.py` is a copy of `weewx/listener.py`, byte for byte. A test
-compares the two when WeeWX has one, so the copy cannot drift. Do not edit it; when
-the core carries the listener, the driver picks that up on its own and the copy can
-go.
-
-## Adding a field
-
-1. Add the raw name to the catalog through the generator, not by hand.
-2. Give it a unit group if WeeWX does not know the field.
-3. If it belongs to a sensor family the driver does not know, add the family to
-   `CHANNELS` with its channel count.
-4. Add a captured payload to `tests/fixtures` and a test that says what should come
-   out of it.
-
-## Releasing
-
-Set the version in `install.py` and `bin/user/ecowitt/__init__.py`, update
-`CHANGELOG.md`, then tag:
-
-```
-git tag v0.2.0
-git push origin v0.2.0
-```
-
-The release workflow checks that the tag matches both files, builds the extension
-zip, and publishes it.
+The wiki mirrors `docs/`. Publish the same pages to the wiki checkout, removing
+`.md` from local page links there; keep the source links intact for GitHub browsing.
