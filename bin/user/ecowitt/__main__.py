@@ -23,10 +23,7 @@ import time
 from . import VERSION, catalog, columns, infer
 from .mapping import Mapper, placement_note
 
-try:
-    from weewx.listener import HTTPListener
-except ImportError:
-    from user.listener import HTTPListener
+from user.listener import HTTPListener
 
 ECOWITT_RESPONSE = '{"errcode":"0","errmsg":"ok"}'
 

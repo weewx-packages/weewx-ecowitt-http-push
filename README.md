@@ -17,8 +17,7 @@ which descends from Matthew Wall's `weewx-interceptor`.
   upload. See the [hardware list](docs/Hardware.md) for gateways, consoles,
   sensors and Fine Offset variants.
 * A network path from the console to the WeeWX machine on the listening port.
-* No Python packages beyond WeeWX. The driver bundles a listener for WeeWX
-  versions that do not provide `weewx.listener`.
+* No Python packages beyond WeeWX. The driver brings its own HTTP listener.
 
 ## Installation
 
