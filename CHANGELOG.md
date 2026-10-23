@@ -21,6 +21,8 @@
   miles and kPa as inHg.
 * With `trust_proxy`, the listener takes the last `X-Forwarded-For` address, the
   one the proxy added. The first one can be set by the client.
+* The driver always uses its own listener in `user.listener`. It no longer
+  looks for a `weewx.listener` module, which WeeWX does not have.
 
 ## 0.3.2 (2026-10-21)
 

@@ -61,8 +61,6 @@ records no rain for that one packet.
 
 ## Listener options
 
-The driver uses `weewx.listener` when available and the bundled copy otherwise.
-
 | Option | Default | Meaning |
 |---|---|---|
 | `port` | `80`; installer sets `8000` | Listening port; ports below 1024 may require elevated privileges |

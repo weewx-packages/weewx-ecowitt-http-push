@@ -6,7 +6,7 @@
 | `catalog.py`, `infer.py`, `mapping.py` | Generated fields, inference and packet mapping |
 | `columns.py`, `consoles.py`, `report.py` | Archive checks, console identities and sensor reports |
 | `driver.py`, `__main__.py` | WeeWX driver and diagnostic command |
-| `bin/user/listener.py` | Bundled listener for WeeWX versions without `weewx.listener` |
+| `bin/user/listener.py` | HTTP listener that receives the uploads |
 | `tools/`, `tests/fixtures/` | Generators and redacted captured uploads |
 
 ## Tests
@@ -28,9 +28,8 @@ python -m pytest tests -q
 
 The command above includes WeeWX integration tests. `.github/workflows/ci.yml`
 runs the tests on several Python versions, with and without WeeWX, and checks
-syntax compatibility with vermin. The bundled listener belongs to this project.
-The driver uses `weewx.listener` instead when WeeWX provides one, and the tests
-then require both files to be identical.
+syntax compatibility with vermin. The listener in `bin/user/listener.py`
+belongs to this project.
 
 ## Catalog and references
 

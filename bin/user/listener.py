@@ -11,7 +11,7 @@ never answers a request. It posts on its own schedule, and the driver has to be 
 This module provides that server, so a driver does not have to write one. A driver
 creates a listener, then iterates over it:
 
-    from weewx.listener import HTTPListener
+    from user.listener import HTTPListener
 
     class MyDriver(weewx.drivers.AbstractDevice):
 
