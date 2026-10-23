@@ -11,17 +11,30 @@
 
 ## Tests
 
+Clone this repository and enter its root before running development commands.
+Use a separate development virtual environment:
+
 ```sh
-pip install pytest
+git clone https://github.com/weewx-packages/weewx-ecowitt-http-push.git
+cd weewx-ecowitt-http-push
+python -m venv .venv
+. .venv/bin/activate
+```
+
+```sh
+python -m pip install weewx pytest
 python -m pytest tests -q
 ```
 
-Tests needing WeeWX are skipped when it is absent. Install `weewx` to include
-them. CI covers Python 3.8–3.13, WeeWX integration and syntax compatibility with
-Python 3.7. The bundled listener must remain identical to the core version it
+The command above includes WeeWX integration tests. CI covers Python 3.8–3.13,
+WeeWX integration and syntax compatibility with Python 3.7. The bundled listener must remain identical to the core version it
 copies; update it from upstream rather than modifying it separately.
 
 ## Catalog and references
+
+Run these commands from the checkout above. Obtain the source
+`ecowittcustom.py` and WeeWX's `schemas/wview_extended.py` before importing a
+catalog, and replace the placeholder paths with those files.
 
 ```sh
 python tools/import_catalog.py path/to/ecowittcustom.py \
@@ -55,3 +68,5 @@ module path `user.ecowitt.driver` stable.
 
 The wiki mirrors `docs/`. Publish the same pages to the wiki checkout, removing
 `.md` from local page links there; keep the source links intact for GitHub browsing.
+
+<!-- Documentation updated 2026-10-23 by weewx-packages. -->

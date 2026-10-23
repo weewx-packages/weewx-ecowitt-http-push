@@ -17,12 +17,15 @@ fit your network.
 
 ## HTTP responses
 
+With `curl` installed and WeeWX's listener running on this host, test the
+default URL below. Adapt it to any configured path, token and address
+restrictions before sending the request.
+
 ```sh
 curl -s -o /dev/null -w '%{http_code}\n' -X POST -d 'tempf=59.7' http://localhost:8000/
 ```
 
-Match any configured path, token and address restrictions. HTTP 200 confirms
-listener acceptance, not mapping or archival of every field.
+HTTP 200 confirms listener acceptance, not mapping or archival of every field.
 
 | Code | Meaning |
 |---|---|
@@ -63,3 +66,5 @@ At midnight the counter resets; WeeWX logs the reset and skips that delta.
 Include relevant logs with preceding lines, diagnostic output, console model and
 firmware, and `weectl --version`. Redact credentials from manually captured uploads.
 [Open an issue](https://github.com/weewx-packages/weewx-ecowitt-http-push/issues).
+
+<!-- Documentation updated 2026-10-23 by weewx-packages. -->

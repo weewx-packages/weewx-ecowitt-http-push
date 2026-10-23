@@ -11,6 +11,9 @@ Fine Offset variants.
 
 ## Install
 
+Use the `weectl` from your WeeWX Python environment. Add
+`--config=/path/to/weewx.conf` to target another station.
+
 ```sh
 weectl extension install https://github.com/weewx-packages/weewx-ecowitt-http-push/releases/download/v0.3.2/weewx-ecowitt-http-push-0.3.2.zip
 weectl station reconfigure
@@ -20,10 +23,8 @@ Select **Ecowitt**. In WS View Plus, open *Weather Services → Customized*, sel
 **Ecowitt**, and set the WeeWX machine's address, port **8000**, path **/** and
 an upload interval of **60 seconds**. Restart WeeWX.
 
-Use the `weectl` from your WeeWX Python environment. Add
-`--config=/path/to/weewx.conf` to target another station. Stock WeeWX accepts the
-fixed URL above or a downloaded archive. For updates, repeat the archive install
-as described in [Installation and updates](docs/Installation.md).
+Stock WeeWX accepts the fixed URL above or a downloaded archive. For updates,
+repeat the archive install as described in [Installation and updates](docs/Installation.md).
 
 A minimal station configuration is:
 

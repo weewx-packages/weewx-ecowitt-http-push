@@ -5,6 +5,9 @@ Release 0.3.2 requires WeeWX >=5,<6, Python >=3.7 and a gateway or console with
 
 ## Install
 
+Use the `weectl` from your WeeWX Python environment. Add
+`--config=/path/to/weewx.conf` to target a specific station.
+
 ```sh
 weectl extension install https://github.com/weewx-packages/weewx-ecowitt-http-push/releases/download/v0.3.2/weewx-ecowitt-http-push-0.3.2.zip
 weectl station reconfigure
@@ -12,9 +15,8 @@ weectl station reconfigure
 
 Select **Ecowitt**. The installer configures `[Ecowitt]`,
 `driver = user.ecowitt.driver` and rain calculation. These technical names remain
-compatible with earlier versions. Run commands using your WeeWX environment.
-Add `--config=/path/to/weewx.conf` when targeting a specific station. A downloaded
-copy of the same release archive can replace the URL.
+compatible with earlier versions. A downloaded copy of the same release
+archive can replace the URL.
 
 Stock WeeWX 5.5.2 has no extension repository, search or update commands and does
 not resolve package IDs. The separately developed
