@@ -28,9 +28,9 @@ python -m pytest tests -q
 
 The command above includes WeeWX integration tests. `.github/workflows/ci.yml`
 runs the tests on several Python versions, with and without WeeWX, and checks
-syntax compatibility with vermin. The bundled listener must remain identical to
-the core version it copies; update it from upstream rather than modifying it
-separately.
+syntax compatibility with vermin. The bundled listener belongs to this project.
+The driver uses `weewx.listener` instead when WeeWX provides one, and the tests
+then require both files to be identical.
 
 ## Catalog and references
 

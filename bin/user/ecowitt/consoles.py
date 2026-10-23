@@ -60,9 +60,14 @@ def path_for(weewx_root=None, configured=None, sqlite_root=None):
     Beside the database, because that is a directory WeeWX writes to as itself, and
     the one people back up. Under a package installation the configuration directory
     belongs to root and the driver cannot write there at all.
+
+    A relative sqlite_root, such as 'archive' in a pip installation, is relative to
+    weewx_root, which is how WeeWX itself finds the database.
     """
     if configured:
         return configured
+    if sqlite_root and weewx_root:
+        sqlite_root = os.path.join(weewx_root, sqlite_root)
     for directory in (sqlite_root, weewx_root):
         if directory and os.path.isdir(directory) and os.access(directory, os.W_OK):
             return os.path.join(directory, FILENAME)

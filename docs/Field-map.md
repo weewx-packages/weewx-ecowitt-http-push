@@ -48,13 +48,19 @@ The catalog supplies unit groups; the driver registers only fields WeeWX does no
 already know. LOOP packets use US units: °F, inHg, inches and mph. WeeWX handles
 subsequent unit conversion and report formatting.
 
-Five catalog unit groups are not defined in WeeWX: `group_dbm`,
-`group_lengthmm`, `group_pressurevpd`, `group_sunhours` and `group_usiecm`.
-They cover fields such as `soilEC1..16`, `vpd`, `air_ch1..4`, `depth_ch1..4`,
-`thi_ch1..4`, `fsunhours` and the sensor `_rssi` fields. WeeWX cannot convert
-them. With `[StdConvert] target_unit = US`, packets pass unconverted. With
-`METRIC` or `METRICWX`, the first packet containing such a field raises a
-`KeyError` in `StdConvert` and stops WeeWX.
+The driver adds five unit groups that WeeWX does not define, with the units of
+the ecowittcustom driver:
+
+| Group | Fields | US | METRIC, METRICWX |
+|---|---|---|---|
+| `group_dbm` | `_rssi` fields | dBm | dBm |
+| `group_lengthmm` | `air_ch1..4`, `depth_ch1..4`, `thi_ch1..4` | mm | mm |
+| `group_pressurevpd` | `vpd` | inHg | kPa |
+| `group_sunhours` | `fsunhours` | h | h |
+| `group_usiecm` | `soilEC1..16` | µS/cm | µS/cm |
+
+A group that WeeWX or another extension has already defined when the driver
+loads keeps that definition.
 
 Use [Diagnostics](Diagnostics.md) to inspect mappings, and
 [Database columns](Database-columns.md) to retain readings outside your schema.

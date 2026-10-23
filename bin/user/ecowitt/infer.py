@@ -45,6 +45,12 @@ INDEXED = re.compile(r'^(?P<stem>.*?)(?P<index>\d+)(?P<tail>[A-Za-z_]*)$')
 
 # What a name says about what it measures, when no series covers it. Ordered: the
 # first match wins, so the specific patterns come before the general ones.
+#
+# The value is stored as sent, in a packet the driver marks as US. So the unit in each
+# rule has to be the US unit of its group, or WeeWX misreads the value: 250 mm in
+# group_distance would be read as 250 miles. Where the hardware sends a unit that is
+# not the US one, the rule names a group whose US unit it is: group_lengthmm is mm in
+# every unit system. The driver registers it and group_pressurevpd with WeeWX.
 RULES = [
     (r'rssi$', 'group_db', 'dB'),
     (r'_sig$', 'group_count', 'count'),
@@ -60,8 +66,8 @@ RULES = [
     (r'co2|^co(\d|$)', 'group_fraction', 'ppm'),
     (r'solarradiation|radiation', 'group_radiation', 'watt_per_meter_squared'),
     (r'^uv', 'group_uv', 'uv_index'),
-    (r'^vpd$', 'group_pressure', 'kPa'),
-    (r'^(depth|air|thi)_ch', 'group_distance', 'mm'),
+    (r'^vpd$', 'group_pressurevpd', 'inHg'),
+    (r'^(depth|air|thi)_ch', 'group_lengthmm', 'mm'),
 ]
 
 RULES = [(re.compile(pattern), group, unit) for pattern, group, unit in RULES]

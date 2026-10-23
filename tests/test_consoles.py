@@ -175,13 +175,17 @@ def test_a_station_without_a_passkey_is_refused(make_driver):
         make_driver(stations={'garden': {'field_map_extensions': {}}})
 
 
-def test_hardware_that_identifies_itself_with_nothing_still_works(make_driver):
-    """Not every device sends a PASSKEY. One that does not is adopted as itself."""
+def test_an_upload_without_an_identity_is_read_but_not_adopted(make_driver):
+    """A test with curl, say, must not lock out the console that comes after it."""
     driver = make_driver()
+    packets = driver.genLoopPackets()
     post(driver, 'tempf=59.7')
+    assert next(packets)['outTemp'] == 59.7
+    assert driver.known == set()
 
-    assert next(driver.genLoopPackets())['outTemp'] == 59.7
-    assert driver.known == {''}
+    post(driver, 'PASSKEY=%s&tempf=60.0' % GARDEN)
+    assert next(packets)['outTemp'] == 60.0
+    assert driver.known == {GARDEN}
 
 
 # ---------------------------------------------------------------- the file
@@ -195,6 +199,15 @@ def test_the_file_explains_itself(tmp_path):
     assert '[[stations]]' in text
     assert 'delete its line and restart' in text
     assert consoles.read(path) == [GARDEN]
+
+
+def test_a_relative_sqlite_root_is_under_weewx_root(tmp_path):
+    """As WeeWX finds the database, not from wherever WeeWX was started."""
+    (tmp_path / 'archive').mkdir()
+
+    path = consoles.path_for(str(tmp_path), None, 'archive')
+
+    assert path == os.path.join(str(tmp_path), 'archive', consoles.FILENAME)
 
 
 def test_an_unwritable_file_does_not_stop_the_driver(make_driver, caplog):

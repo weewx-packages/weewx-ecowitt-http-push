@@ -207,3 +207,38 @@ def test_a_console_whose_clock_is_wrong_falls_back_to_arrival(payload):
         assert packet['dateTime'] == int(arrived)
     finally:
         made.closePort()
+
+
+# ------------------------------------------------------------------ unit groups
+
+def test_every_catalog_group_converts_to_metric():
+    """StdConvert stops WeeWX with a KeyError on a group it does not know.
+
+    Reports fail the same way, in any unit system, so format the value as well.
+    """
+    import weewx.defaults
+    import weewx.units
+    from ecowitt import catalog
+
+    formatter = weewx.units.Formatter.fromSkinDict(weewx.defaults.defaults)
+    for field, group in sorted(catalog.GROUPS.items()):
+        weewx.units.obs_group_dict.setdefault(field, group)
+        for target in (weewx.METRIC, weewx.METRICWX):
+            packet = {'usUnits': weewx.US, 'dateTime': 1, field: 1.0}
+            converted = weewx.units.StdUnitConverters[target].convertDict(packet)
+            converted['usUnits'] = target
+            value = weewx.units.as_value_tuple(converted, field)
+            str(weewx.units.ValueHelper(value, formatter=formatter))
+
+    packet = {'usUnits': weewx.US, 'dateTime': 1, 'vpd': 0.047}
+    metric = weewx.units.StdUnitConverters[weewx.METRIC].convertDict(packet)
+    assert round(metric['vpd'], 2) == 0.16      # inHg -> kPa
+
+
+def test_a_guessed_unit_is_the_one_weewx_reads():
+    """A guess is stored as sent, in a US packet. Any other unit would be misread."""
+    import weewx.units
+    from ecowitt import infer
+
+    for pattern, group, unit in infer.RULES:
+        assert weewx.units.USUnits[group] == unit, pattern.pattern
