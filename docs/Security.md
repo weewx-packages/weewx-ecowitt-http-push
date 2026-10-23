@@ -40,7 +40,7 @@ For nginx:
 ```nginx
 location /a8f3c1e0-4b2d/report {
     proxy_pass http://127.0.0.1:8000;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-For $remote_addr;
 }
 ```
 
@@ -54,7 +54,10 @@ handle /a8f3c1e0-4b2d/report {
 
 Enable `trust_proxy` only when the listener is reachable solely through a proxy
 you control. It makes `allowed_hosts` check the forwarded client address;
-otherwise it would see the proxy's address.
+otherwise it would see the proxy's address. The listener takes the first
+address in `X-Forwarded-For`. A proxy that appends to a header sent by the
+client, such as nginx with `$proxy_add_x_forwarded_for`, lets the client choose
+that address. The nginx example therefore replaces the header.
 
 The default body limit is 65536 bytes; larger uploads receive HTTP 413. Restart
 WeeWX after changes and update the console to match, or uploads will be rejected.

@@ -15,7 +15,9 @@ identity persists across restarts, in this order:
 
 The fallback file is `ecowitt-consoles.txt` in the first writable existing
 directory among `SQLITE_ROOT` and `WEEWX_ROOT`, otherwise
-`/var/tmp/weewx-ecowitt-consoles.txt`. `console_file` overrides that path. If
+`/var/tmp/weewx-ecowitt-consoles.txt`. A relative `SQLITE_ROOT`, such as
+`archive` in a pip installation, is checked against WeeWX's working directory,
+not `WEEWX_ROOT`. `console_file` overrides that path. If
 neither database nor file can be written, learning is temporary; another console
 could be adopted after a restart. A configured identity avoids that dependency:
 

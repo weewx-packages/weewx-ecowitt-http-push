@@ -35,6 +35,9 @@ as their field name unless a known series supplies a destination.
 | `uv`, `vpd` | UV index; pressure / kPa |
 | `depth_ch`, `air_ch`, `thi_ch` | Distance / mm |
 
+The driver stores guessed values as sent. WeeWX reads them in the US unit of the
+group, so a guess whose unit differs, such as kPa or mm, is misread.
+
 Names with no recognised pattern are logged and dropped even in `all` mode.
 [Report new sensors](New-sensors.md) so quantities and units can be verified and
 added to the catalog. Accepted fields also need [archive columns](Database-columns.md).

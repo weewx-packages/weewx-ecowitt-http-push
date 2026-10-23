@@ -36,6 +36,29 @@ produce a warning. The driver does not decide whether WeeWX can revise an archiv
 record for a late packet. If your WeeWX installation cannot revise archived
 intervals, use a smaller `max_behind`, such as `90`.
 
+## Rain
+
+Ecowitt sends rain as running counters such as `dailyrainin`, which the driver
+maps to `dayRain`. WeeWX derives the packet's `rain` from such a counter with
+its `Delta` type, and it computes `rain` only when it is listed under
+`[[Calculations]]`. Both entries are needed:
+
+```ini
+[StdWXCalculate]
+    [[Calculations]]
+        rain = prefer_hardware
+    [[Delta]]
+        [[[rain]]]
+            input = dayRain
+```
+
+The installer adds the `[[Delta]]` entry if none exists. It does not add the
+`rain` line under `[[Calculations]]`; add it yourself. Keep the other lines
+already in `[[Calculations]]`.
+
+When the daily counter resets at midnight, WeeWX logs a counter reset and
+records no rain for that one packet.
+
 ## Listener options
 
 The driver uses `weewx.listener` when available and the bundled copy otherwise.
