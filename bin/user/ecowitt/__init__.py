@@ -5,4 +5,4 @@
 #
 """Receive Ecowitt custom-server HTTP uploads as WeeWX LOOP packets."""
 
-VERSION = '0.3.2'
+VERSION = '0.3.3'

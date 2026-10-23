@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.3 (2026-10-23)
 
 * Register the unit groups `group_dbm`, `group_lengthmm`, `group_pressurevpd`,
   `group_sunhours` and `group_usiecm` with WeeWX. With `target_unit = METRIC` or
