@@ -1,28 +1,26 @@
 # Installation and updates
 
-Release 0.3.2 requires WeeWX >=5,<6, Python >=3.7 and a gateway or console with
-**Customized** server upload. No additional Python packages are required. See [Hardware](Hardware.md).
+The driver needs a gateway or console with **Customized** server upload and no
+additional Python packages. See [Hardware](Hardware.md).
 
 ## Install
 
-Use the `weectl` from your WeeWX Python environment. Add
-`--config=/path/to/weewx.conf` to target a specific station.
+Install `ecowitt-http-push` from the [WeeWX packages catalog](https://github.com/weewx-packages/catalog/blob/main/packages/ecowitt-http-push.md).
+The catalog page lists the current release, its WeeWX and Python
+requirements, and the install, update and removal commands.
+
+The installer adds an `[Ecowitt]` section with `driver = user.ecowitt.driver`,
+`port = 8000` and `infer_unknown = series`, and a `[[Delta]]` entry for rain.
+It adds only settings that are missing and leaves the active driver unchanged.
+Select the driver by its module path; the interactive driver list of
+`weectl station reconfigure` does not show it:
 
 ```sh
-weectl extension install https://github.com/weewx-packages/weewx-ecowitt-http-push/releases/download/v0.3.2/weewx-ecowitt-http-push-0.3.2.zip
-weectl station reconfigure
+weectl station reconfigure --driver=user.ecowitt.driver
 ```
 
-Select **Ecowitt**. The installer configures `[Ecowitt]`,
-`driver = user.ecowitt.driver` and rain calculation. These technical names remain
-compatible with earlier versions. A downloaded copy of the same release
-archive can replace the URL.
-
-Stock WeeWX 5.5.2 has no extension repository, search or update commands and does
-not resolve package IDs. The separately developed
-[weewx-package-manager](https://github.com/weewx-packages/weewx-package-manager)
-is experimental, unreleased and outside the catalog. It is not required for
-this installation. Use the archive commands on this page.
+Add `--config=/path/to/weewx.conf` to target a specific station. Then complete
+the [rain configuration](Configuration.md#rain).
 
 ## Configure the hardware
 
@@ -44,20 +42,24 @@ sudo systemctl restart weewx
 sudo journalctl -u weewx -f
 ```
 
-Within one upload interval, look for `Listening for HTTP requests` and incoming
-readings. Resolve fields waiting for a [mapping](Field-map.md), then add any
-needed [archive columns](Database-columns.md).
+At startup the log shows `Listening for HTTP requests`. On a new installation,
+the first upload is logged with the console that the driver now answers to; see
+[console identities](Several-consoles.md). Resolve fields waiting for a
+[mapping](Field-map.md), then add any needed [archive columns](Database-columns.md).
 
 ## Update or remove
 
-Read the [changelog](https://github.com/weewx-packages/weewx-ecowitt-http-push/blob/main/CHANGELOG.md)
-for changed field placements. Back up your station configuration and database.
-Stop WeeWX, install the fixed release URL shown above over the existing
-extension, review `[Ecowitt]` and rain calculation settings, then start WeeWX.
-The installed extension is named `ecowitt`. For a later release, use that
-release's published archive URL. Installation does not restart WeeWX.
+The catalog page lists the update and removal commands. The installed extension
+is named `ecowitt`.
 
-To remove the driver, run `weectl extension uninstall ecowitt`, select another
-driver with `weectl station reconfigure`, then restart WeeWX. Archive data remains.
+Before an update, read the [changelog](https://github.com/weewx-packages/weewx-ecowitt-http-push/blob/main/CHANGELOG.md)
+for changed field placements and back up your station configuration and
+database. Stop WeeWX, update, review `[Ecowitt]` and the rain settings, then
+start WeeWX. An update adds missing settings and leaves existing ones
+unchanged. Installation does not restart WeeWX.
 
-<!-- Documentation updated 2026-10-23 by weewx-packages. -->
+Removal deletes `station_type` from `[Station]`, whichever driver it names,
+together with the options the installer adds to `[Ecowitt]` and `[[Delta]]`,
+even if you changed their values. Select
+another driver with `weectl station reconfigure`, then restart WeeWX. Archive
+data remains.

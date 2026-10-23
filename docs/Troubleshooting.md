@@ -19,18 +19,23 @@ fit your network.
 
 With `curl` installed and WeeWX's listener running on this host, test the
 default URL below. Adapt it to any configured path, token and address
-restrictions before sending the request.
+restrictions before sending the request. The test body carries no reading.
 
 ```sh
-curl -s -o /dev/null -w '%{http_code}\n' -X POST -d 'tempf=59.7' http://localhost:8000/
+curl -s -o /dev/null -w '%{http_code}\n' -X POST -d 'stationtype=test' http://localhost:8000/
 ```
 
 HTTP 200 confirms listener acceptance, not mapping or archival of every field.
+The listener answers before the driver checks the console identity. If the
+driver has neither a `passkey` nor a learned console, it adopts this upload's
+empty identity and ignores the real console until WeeWX restarts. Restart WeeWX
+after the test in that case.
 
 | Code | Meaning |
 |---|---|
 | `200` | Upload accepted by the listener |
 | `404` | Path mismatch |
+| `400` | Invalid `Content-Length` header |
 | `403` | Token or client address rejected |
 | `413` | Body exceeds `max_body` |
 
@@ -49,22 +54,12 @@ cannot be separated afterwards.
 
 ## Rain stays empty
 
-Ecowitt sends counters; WeeWX's `StdDelta` derives packet rainfall. The installer
-has configured this since 0.3.1. For older installations, update the extension or add:
-
-```ini
-[StdWXCalculate]
-    [[Delta]]
-        [[[rain]]]
-            input = dayRain
-```
-
-At midnight the counter resets; WeeWX logs the reset and skips that delta.
+Ecowitt sends counters, and WeeWX derives packet rainfall from `dayRain`. Check
+both entries described under [Rain](Configuration.md#rain). The installer does
+not add the `rain` line under `[[Calculations]]`.
 
 ## Report a problem
 
 Include relevant logs with preceding lines, diagnostic output, console model and
 firmware, and `weectl --version`. Redact credentials from manually captured uploads.
 [Open an issue](https://github.com/weewx-packages/weewx-ecowitt-http-push/issues).
-
-<!-- Documentation updated 2026-10-23 by weewx-packages. -->

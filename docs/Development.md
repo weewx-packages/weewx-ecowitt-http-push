@@ -26,9 +26,11 @@ python -m pip install weewx pytest
 python -m pytest tests -q
 ```
 
-The command above includes WeeWX integration tests. CI covers Python 3.8–3.13,
-WeeWX integration and syntax compatibility with Python 3.7. The bundled listener must remain identical to the core version it
-copies; update it from upstream rather than modifying it separately.
+The command above includes WeeWX integration tests. `.github/workflows/ci.yml`
+runs the tests on several Python versions, with and without WeeWX, and checks
+syntax compatibility with vermin. The bundled listener must remain identical to
+the core version it copies; update it from upstream rather than modifying it
+separately.
 
 ## Catalog and references
 
@@ -68,5 +70,3 @@ module path `user.ecowitt.driver` stable.
 
 The wiki mirrors `docs/`. Publish the same pages to the wiki checkout, removing
 `.md` from local page links there; keep the source links intact for GitHub browsing.
-
-<!-- Documentation updated 2026-10-23 by weewx-packages. -->
