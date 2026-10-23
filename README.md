@@ -50,8 +50,8 @@ A minimal station configuration is:
     port = 8000
 ```
 
-WeeWX records rain only when `rain` is listed under `[[Calculations]]` in
-`[StdWXCalculate]`. The installer does not add that line. See
+The installer also adds the two `[StdWXCalculate]` entries that WeeWX needs to
+record rain from the console's counters, unless they are already set. See
 [Rain](docs/Configuration.md#rain). The
 [configuration reference](docs/Configuration.md) lists the driver and
 listener options with their defaults.
@@ -72,9 +72,6 @@ The [documentation index](docs/Home.md) lists all pages, including
 
 * A console's `PASSKEY` keeps consoles apart but does not authenticate them.
   The listener speaks plain HTTP. See [Network access](docs/Security.md).
-* Some catalog fields use unit groups that WeeWX does not define. With
-  `[StdConvert] target_unit` other than `US`, a packet containing one of them
-  stops WeeWX. See [Units and archive storage](docs/Field-map.md#units-and-archive-storage).
 
 ## Development
 

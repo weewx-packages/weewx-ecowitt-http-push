@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased
+
+* Register the unit groups `group_dbm`, `group_lengthmm`, `group_pressurevpd`,
+  `group_sunhours` and `group_usiecm` with WeeWX. With `target_unit = METRIC` or
+  `METRICWX`, the first packet carrying `soilEC1`, `vpd`, `depth_ch1` or an
+  `_rssi` field stopped WeeWX with a `KeyError`. Reports showing these fields
+  failed the same way.
+* The installer now also sets `rain = prefer_hardware` under
+  `[StdWXCalculate] [[Calculations]]`, unless a `rain` line exists. Without it
+  `rain` stayed empty. Existing installations add it by hand or reinstall.
+* The installer no longer lists `[Station] station_type`. Uninstalling removed
+  it, whichever driver it named.
+* An upload without `PASSKEY` or `ID` is no longer adopted as the station's
+  console. Adopting it locked out the real console until a restart.
+* A relative `SQLITE_ROOT` is resolved against `WEEWX_ROOT` when choosing where
+  to keep the console fallback file, as WeeWX does for the database.
+* Inferred `depth_ch`, `air_ch` and `thi_ch` fields use `group_lengthmm`, and an
+  inferred `vpd` uses `group_pressurevpd` in inHg. WeeWX read millimetres as
+  miles and kPa as inHg.
+* With `trust_proxy`, the listener takes the last `X-Forwarded-For` address, the
+  one the proxy added. The first one can be set by the client.
+
 ## 0.3.2 (2026-10-21)
 
 * Publish as Ecowitt HTTP Push under `weewx-packages`, with package ID

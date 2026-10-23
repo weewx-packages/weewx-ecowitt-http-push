@@ -16,8 +16,8 @@ identity persists across restarts, in this order:
 The fallback file is `ecowitt-consoles.txt` in the first writable existing
 directory among `SQLITE_ROOT` and `WEEWX_ROOT`, otherwise
 `/var/tmp/weewx-ecowitt-consoles.txt`. A relative `SQLITE_ROOT`, such as
-`archive` in a pip installation, is checked against WeeWX's working directory,
-not `WEEWX_ROOT`. `console_file` overrides that path. If
+`archive` in a pip installation, is relative to `WEEWX_ROOT`, as for the
+database. `console_file` overrides that path. If
 neither database nor file can be written, learning is temporary; another console
 could be adopted after a restart. A configured identity avoids that dependency:
 
@@ -28,7 +28,9 @@ could be adopted after a restart. A configured identity avoids that dependency:
 
 Find the value in an upload using [Diagnostics](Diagnostics.md), or in the
 fallback file if used. Keep it out of public reports. Wunderground's `ID` is used
-in place of `PASSKEY`; hardware sending neither has no distinguishable identity.
+in place of `PASSKEY`. An upload with neither has no distinguishable identity:
+while no console is known it is read but not learned, and once a console is
+known it is ignored.
 An identity prevents accidental mixing; it does not authenticate the hardware.
 
 ## Several consoles in one instance

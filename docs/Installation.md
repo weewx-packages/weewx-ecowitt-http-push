@@ -10,7 +10,8 @@ The catalog page lists the current release, its WeeWX and Python
 requirements, and the install, update and removal commands.
 
 The installer adds an `[Ecowitt]` section with `driver = user.ecowitt.driver`,
-`port = 8000` and `infer_unknown = series`, and a `[[Delta]]` entry for rain.
+`port = 8000` and `infer_unknown = series`, and the [rain](Configuration.md#rain)
+entries `rain = prefer_hardware` under `[[Calculations]]` and `[[Delta]]`.
 It adds only settings that are missing and leaves the active driver unchanged.
 Select the driver by its module path; the interactive driver list of
 `weectl station reconfigure` does not show it:
@@ -19,8 +20,7 @@ Select the driver by its module path; the interactive driver list of
 weectl station reconfigure --driver=user.ecowitt.driver
 ```
 
-Add `--config=/path/to/weewx.conf` to target a specific station. Then complete
-the [rain configuration](Configuration.md#rain).
+Add `--config=/path/to/weewx.conf` to target a specific station.
 
 ## Configure the hardware
 
@@ -58,8 +58,8 @@ database. Stop WeeWX, update, review `[Ecowitt]` and the rain settings, then
 start WeeWX. An update adds missing settings and leaves existing ones
 unchanged. Installation does not restart WeeWX.
 
-Removal deletes `station_type` from `[Station]`, whichever driver it names,
-together with the options the installer adds to `[Ecowitt]` and `[[Delta]]`,
-even if you changed their values. Select
+Removal deletes the options the installer adds to `[Ecowitt]`, the `rain` line
+under `[[Calculations]]` and the `rain` entry under `[[Delta]]`, even if you
+changed their values. It leaves `station_type` in `[Station]` unchanged. Select
 another driver with `weectl station reconfigure`, then restart WeeWX. Archive
 data remains.

@@ -32,11 +32,12 @@ as their field name unless a known series supplies a destination.
 | `pm1`, `pm4`, `pm10`, `pm25` | Concentration / µg/m³ |
 | `co2`, `co` | Concentration / ppm |
 | `solarradiation`, `radiation` | Radiation / W/m² |
-| `uv`, `vpd` | UV index; pressure / kPa |
+| `uv`, `vpd` | UV index; vapour pressure deficit / inHg |
 | `depth_ch`, `air_ch`, `thi_ch` | Distance / mm |
 
-The driver stores guessed values as sent. WeeWX reads them in the US unit of the
-group, so a guess whose unit differs, such as kPa or mm, is misread.
+The driver stores guessed values as sent, and each pattern's group has that unit
+as its US unit. Distances in mm use `group_lengthmm`, which is mm in every unit
+system; see [Units and archive storage](Field-map.md#units-and-archive-storage).
 
 Names with no recognised pattern are logged and dropped even in `all` mode.
 [Report new sensors](New-sensors.md) so quantities and units can be verified and

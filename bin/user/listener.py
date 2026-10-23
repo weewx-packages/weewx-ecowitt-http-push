@@ -222,7 +222,8 @@ class HTTPListener(Listener):
             token is required. A device that cannot set a header or a query parameter
             can carry the token in 'path' instead.
         trust_proxy (bool): Take the client address from 'X-Forwarded-For'. Only set
-            this when a proxy you control sets that header. Default False.
+            this when a proxy you control sets that header. The last address in it
+            is used, the one the proxy added. Default False.
         log_raw (bool): Log every request body at debug level. This is what you turn on
             when a sensor is missing from the data.
         queue_size (int): How many requests may wait to be picked up.
@@ -503,9 +504,12 @@ class _Handler(BaseHTTPRequestHandler):
 
     def _client_address(self):
         if self.server.listener.trust_proxy:
-            forwarded = self.headers.get('X-Forwarded-For')
-            if forwarded:
-                return forwarded.split(',')[0].strip()
+            # The proxy appends the address it saw to whatever the client sent, so
+            # only the last entry comes from the proxy. Any before it, including a
+            # whole header of its own, the client can make up.
+            forwarded = ','.join(self.headers.get_all('X-Forwarded-For') or [])
+            if forwarded.strip():
+                return forwarded.split(',')[-1].strip()
         return self.client_address[0]
 
     def log_message(self, fmt, *args):

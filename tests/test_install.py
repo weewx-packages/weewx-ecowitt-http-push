@@ -93,3 +93,37 @@ def test_the_counter_it_uses_is_one_the_driver_produces():
 
     wanted = installer_config()['StdWXCalculate']['Delta']['rain']['input']
     assert wanted in catalog.FIELDS.values()
+
+
+def test_the_installer_asks_for_rain_to_be_calculated():
+    """Stock WeeWX does not list rain under [[Calculations]], so nothing computes it.
+
+    A value somebody already set stays as it is.
+    """
+    import pytest
+
+    pytest.importorskip('weecfg', reason="WeeWX is not installed")
+    import configobj
+    import weeutil.config
+
+    station = configobj.ConfigObj({'StdWXCalculate': {'Calculations': {}}})
+    weeutil.config.conditional_merge(station, installer_config())
+    assert station['StdWXCalculate']['Calculations']['rain'] == 'prefer_hardware'
+
+    station = configobj.ConfigObj({'StdWXCalculate': {'Calculations': {'rain': 'software'}}})
+    weeutil.config.conditional_merge(station, installer_config())
+    assert station['StdWXCalculate']['Calculations']['rain'] == 'software'
+
+
+def test_uninstalling_leaves_the_driver_selection_alone():
+    """Uninstalling removes what the installer lists, whatever its value now is."""
+    import pytest
+
+    pytest.importorskip('weecfg', reason="WeeWX is not installed")
+    import configobj
+    import weecfg
+
+    station = configobj.ConfigObj({'Station': {'station_type': 'Vantage'}})
+    weecfg.remove_and_prune(station, installer_config())
+
+    assert station['Station']['station_type'] == 'Vantage'

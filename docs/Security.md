@@ -54,10 +54,10 @@ handle /a8f3c1e0-4b2d/report {
 
 Enable `trust_proxy` only when the listener is reachable solely through a proxy
 you control. It makes `allowed_hosts` check the forwarded client address;
-otherwise it would see the proxy's address. The listener takes the first
-address in `X-Forwarded-For`. A proxy that appends to a header sent by the
-client, such as nginx with `$proxy_add_x_forwarded_for`, lets the client choose
-that address. The nginx example therefore replaces the header.
+otherwise it would see the proxy's address. The listener takes the last
+address in `X-Forwarded-For`, the one the proxy added. Earlier entries come from
+the client and are ignored. This assumes a single proxy in front of the
+listener.
 
 The default body limit is 65536 bytes; larger uploads receive HTTP 413. Restart
 WeeWX after changes and update the console to match, or uploads will be rejected.

@@ -52,9 +52,9 @@ its `Delta` type, and it computes `rain` only when it is listed under
             input = dayRain
 ```
 
-The installer adds the `[[Delta]]` entry if none exists. It does not add the
-`rain` line under `[[Calculations]]`; add it yourself. Keep the other lines
-already in `[[Calculations]]`.
+The installer adds both entries where they are missing. A `rain` line you have
+already set under `[[Calculations]]` stays as it is. With `rain = hardware`,
+WeeWX does not derive `rain` and it stays empty.
 
 When the daily counter resets at midnight, WeeWX logs a counter reset and
 records no rain for that one packet.

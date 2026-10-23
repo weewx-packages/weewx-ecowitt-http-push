@@ -47,6 +47,54 @@ DRIVER_VERSION = VERSION
 # What the gateway wants to hear before it counts the upload as delivered.
 ECOWITT_RESPONSE = '{"errcode":"0","errmsg":"ok"}'
 
+# Unit groups the catalog uses that WeeWX does not define, as (US unit, metric unit).
+# Without them, StdConvert raises a KeyError the first time it converts a packet with
+# such a field to METRIC or METRICWX, and WeeWX stops. A report that shows one of these
+# fields fails the same way, in any unit system. The names and units are the ones the
+# ecowittcustom driver registers, because the catalog comes from there, and a database
+# or skin that started with that driver has to read the same here.
+#
+# The console sends every value in these groups in the US unit, and the driver marks
+# its packets as US. For vpd that is inHg: the vapour pressure deficit at 59.7 F and
+# 91 % humidity is 0.16 kPa or 0.047 inHg, and the captured upload in tests/fixtures,
+# taken under those conditions, carries vpd=0.047.
+EXTRA_GROUPS = {
+    'group_dbm': ('dBm', 'dBm'),
+    'group_lengthmm': ('mm', 'mm'),
+    'group_pressurevpd': ('inHg', 'kPa'),
+    'group_sunhours': ('sunhours', 'sunhours'),
+    'group_usiecm': ('micro_siemens_per_centimeter', 'micro_siemens_per_centimeter'),
+}
+
+# Format and label, as (format, label), for the units in EXTRA_GROUPS that WeeWX does
+# not know. Only for those: WeeWX consults these dictionaries before the skin, so an
+# entry for a unit it already knows, such as kPa, would override the skin's format for
+# every field in that unit.
+EXTRA_UNITS = {
+    'dBm': ('%.0f', ' dBm'),
+    'sunhours': ('%.2f', ' h'),
+    'micro_siemens_per_centimeter': ('%.0f', ' µS/cm'),
+}
+
+
+def _register_unit_groups():
+    """Add EXTRA_GROUPS and EXTRA_UNITS to the WeeWX unit system.
+
+    Done on import, so that StdConvert and the reports, which run in the same process,
+    know the groups before the first packet arrives. Anything already defined, by WeeWX
+    or by another extension, is left as it is.
+    """
+    for group, (us_unit, metric_unit) in EXTRA_GROUPS.items():
+        weewx.units.USUnits.setdefault(group, us_unit)
+        weewx.units.MetricUnits.setdefault(group, metric_unit)
+        weewx.units.MetricWXUnits.setdefault(group, metric_unit)
+    for unit, (unit_format, label) in EXTRA_UNITS.items():
+        weewx.units.default_unit_format_dict.setdefault(unit, unit_format)
+        weewx.units.default_unit_label_dict.setdefault(unit, label)
+
+
+_register_unit_groups()
+
 
 def loader(config_dict, _engine):
     options = dict(config_dict[DRIVER_NAME])
@@ -199,6 +247,11 @@ class EcowittDriver(weewx.drivers.AbstractDevice):
         passkey = protocol.station_id(text)
 
         if not self.known:
+            if not passkey:
+                # An upload with neither PASSKEY nor ID, such as a test with curl, is
+                # read but not adopted. Adopting the empty string would lock out the
+                # real console until a restart, because '' is not its PASSKEY.
+                return None, self.mapper
             self._adopt(passkey, client)
 
         if passkey not in self.known:

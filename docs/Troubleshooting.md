@@ -26,10 +26,9 @@ curl -s -o /dev/null -w '%{http_code}\n' -X POST -d 'stationtype=test' http://lo
 ```
 
 HTTP 200 confirms listener acceptance, not mapping or archival of every field.
-The listener answers before the driver checks the console identity. If the
-driver has neither a `passkey` nor a learned console, it adopts this upload's
-empty identity and ignores the real console until WeeWX restarts. Restart WeeWX
-after the test in that case.
+The listener answers before the driver checks the console identity. The test
+body carries no `PASSKEY`, so the driver does not adopt it as the station's
+console.
 
 | Code | Meaning |
 |---|---|
@@ -55,8 +54,9 @@ cannot be separated afterwards.
 ## Rain stays empty
 
 Ecowitt sends counters, and WeeWX derives packet rainfall from `dayRain`. Check
-both entries described under [Rain](Configuration.md#rain). The installer does
-not add the `rain` line under `[[Calculations]]`.
+both entries described under [Rain](Configuration.md#rain). The installer adds
+them only where they are missing and does not replace `rain = hardware` under
+`[[Calculations]]`.
 
 ## Report a problem
 
